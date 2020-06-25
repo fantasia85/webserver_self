@@ -6,4 +6,6 @@
 4. [C++11 std::move](https://blog.csdn.net/p942005405/article/details/84644069/)
 5. [Linux进程间通信--eventfd](https://blog.csdn.net/qq_28114615/article/details/97929524)
 6. [setsockopt()函数](https://blog.csdn.net/qq_41097897/article/details/82845404)
-7. [I/O模型](https://www.cnblogs.com/felixzh/p/10345929.html) *同UNP P122* 
+7. [I/O模型](https://www.cnblogs.com/felixzh/p/10345929.html) *同UNP P122*
+8. [NIO学习--Reactor模型](https://blog.csdn.net/qq924862077/article/details/81026740)
+9. [彻底搞懂Reactor模型和Proactor模型](https://cloud.tencent.com/developer/article/1488120) 
