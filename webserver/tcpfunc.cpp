@@ -11,6 +11,7 @@
 #include <netinet/tcp.h>
 
 const int MAX_BUF = 4096;
+const int LISTENQ = 2048;
 
 /* read n bytes from a descriptor */
 ssize_t readn(int fd, void *buf, size_t nbytes)
@@ -179,7 +180,7 @@ void setsocketnodelay(int fd)
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable));
 }
 
-/* set socket nolinger. 当还有为发报文而套接字已关闭时，延迟时间 */
+/* set socket nolinger. 当还有未发报文而套接字已关闭时，延迟时间 */
 void setsocketnolinger(int fd)
 {
     struct linger sktlinger;
@@ -188,3 +189,33 @@ void setsocketnolinger(int fd)
     setsockopt(fd, SOL_SOCKET, SO_LINGER, (const char *)&sktlinger, sizeof(sktlinger));
 }
 
+int tcp_listen(int port)
+{
+    if (port < 0 || port > 65535)
+        return -1;
+
+    int listenfd;
+    struct sockaddr_in serveraddr;
+    if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        return -1;
+
+    /* 消除address already in use的错误 */
+    int val = 1;
+    if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) < 0) {
+        close(listenfd);
+        return -1;
+    }
+
+    bzero(&serveraddr, sizeof(serveraddr));
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serveraddr.sin_port = htons(static_cast<unsigned short>(port));
+
+    if (bind(listenfd, (struct sockaddr *) &serveraddr, sizeof(serveraddr)) < 0)
+        return -1;
+    
+    if (listen(listenfd, LISTENQ) < 0)
+        return -1;
+
+    return listenfd;
+}
