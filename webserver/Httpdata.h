@@ -112,6 +112,7 @@ class Httpdata : public std::enable_shared_from_this<Httpdata> {
         bool iserror;
         Connectionstate connstate;
         Httpmethod hmethod;
+        Httpversion hversion;
         std::string flname;
         std::string path;
         int curpos;
