@@ -15,3 +15,5 @@
 13. [文件I/O和标准I/O的区别](https://blog.csdn.net/zqixiao_09/article/details/50444465) 
 14. [tcpdump参数解析及使用详解](https://blog.csdn.net/lgh1117/article/details/80213397)
 15. [Http协议详解](https://blog.csdn.net/weixin_38087538/article/details/82838762)
+16. [C++11 enable\_shared\_from\_this](https://blog.csdn.net/caoshangpa/article/details/79392878)
+17. [JavaGuide](https://snailclimb.gitee.io/javaguide-interview/#/)
