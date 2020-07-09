@@ -6,6 +6,8 @@
 #include <sys/syscall.h>
 #include <string>
 #include <sys/prctl.h>
+#include <stdio.h>
+#include <assert.h>
 
 /* __thread变量每个线程有一份独立实体，各个线程的值互不干扰 */
 namespace CurrentThread {
@@ -52,3 +54,49 @@ struct Threaddata {
     }
 };
 
+Thread::Thread(const Threadfunc &tfunc, const std::string &str)
+    : started(false), joined(false), pthreadid(0), pid(0),
+    func(tfunc), namestr(str), latch(1) {
+        setdefaultname();
+}
+
+Thread::~Thread() {
+    if (started && !join)
+        pthread_detach(pthreadid);
+}
+
+void Thread::setdefaultname() {
+    if (namestr.empty()) {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "Thread");
+        namestr = buf;
+    }
+}
+
+void *startthread (void *obj) {
+    Threaddata *data = static_cast<Threaddata *>(obj);
+    data->runinthread();
+    delete data;
+    return NULL;
+}
+
+void Thread::start() {
+    assert(!started);
+    started = true;
+    Threaddata *data = new Threaddata(func, namestr, &pid, &latch);
+    if (pthread_create(&pthreadid, NULL, &startthread, data)) {
+        started = false;
+        delete data;
+    }
+    else {
+        latch.wait();
+        assert(pid > 0);
+    }
+}
+
+int Thread::join() {
+    assert(started);
+    assert(!joined);
+    joined = true;
+    return pthread_join(pthreadid, NULL);
+}
