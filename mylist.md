@@ -18,3 +18,4 @@
 16. [C++11 enable\_shared\_from\_this](https://blog.csdn.net/caoshangpa/article/details/79392878)
 17. [JavaGuide](https://snailclimb.gitee.io/javaguide-interview/#/)
 18. [详解git pull和git fetch的区别](https://blog.csdn.net/weixin_41975655/article/details/82887273)
+19. [CountDownLatch的理解和使用](https://www.cnblogs.com/Lee_xy_z/p/10470181.html)
