@@ -19,3 +19,5 @@
 17. [JavaGuide](https://snailclimb.gitee.io/javaguide-interview/#/)
 18. [详解git pull和git fetch的区别](https://blog.csdn.net/weixin_41975655/article/details/82887273)
 19. [CountDownLatch的理解和使用](https://www.cnblogs.com/Lee_xy_z/p/10470181.html)
+20. [muduo架构解析](https://blog.csdn.net/Swartz2015/article/details/56675082?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase)
+21. [muduo库的EventLoop类解析](https://blog.csdn.net/freeelinux/article/details/53510541)
