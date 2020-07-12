@@ -151,7 +151,7 @@ void *bzero(void *ptr, size_t n)
 }
 */
 
-/* set sigpipe signal as SIG_IGN ??? */
+/* set sigpipe signal as SIG_IGN */
 void handle_sigpipe()
 {
     struct sigaction sa;
