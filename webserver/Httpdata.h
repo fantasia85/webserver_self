@@ -15,7 +15,7 @@ class Channel;
 enum Processstate {
     STATE_PARSE_URI = 1,
     STATE_PARSE_HEADERS,
-    STATE_RECV_BODY,
+    //STATE_RECV_BODY,
     STATE_ANALYSIS,
     STATE_FINISH
 };
@@ -29,7 +29,7 @@ enum URIstate {
 enum Headerstate {
     PARSE_HEADER_SUCCESS = 1,
     PARSE_HEADER_AGAIN,
-    PARSSE_HEADDER_ERROR
+    PARSE_HEADER_ERROR
 };
 
 enum Analysisstate {
@@ -41,7 +41,7 @@ enum Parsestate {
     H_START = 0,
     H_KEY,
     H_COLON,
-    H_SPAVCES_AFTER_COLON,
+    H_SPACES_AFTER_COLON,
     H_VALUE,
     H_CR,
     H_LF,
@@ -127,7 +127,7 @@ class Httpdata : public std::enable_shared_from_this<Httpdata> {
 
         void handleread();
         void handlewrite();
-        void handlconn();
+        void handleconn();
         void handleerror(int fd, int errnum, std::string err_msg);
         
         URIstate parseURI();

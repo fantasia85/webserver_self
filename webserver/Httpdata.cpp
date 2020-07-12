@@ -1,8 +1,16 @@
 /* Http状态机，用于解析命令请求，并发送相应的数据 */
 
 #include "Httpdata.h"
+#include "Channel.h"
+#include "Timer.h"
+#include "tcpfunc.h"
+#include "Eventloop.h"
 #include <sys/epoll.h>
-
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <string.h>
 
 pthread_once_t Mimetype::once_control = PTHREAD_ONCE_INIT;
 
@@ -106,7 +114,7 @@ std::string Mimetype::getmime(const std::string &str)
         return mime[str];
 }
 
-/*
+
 Httpdata::Httpdata(Eventloop *eloop, int connfd)
     : loop(eloop),
     ptochannel(new Channel(eloop, connfd)),
@@ -119,6 +127,415 @@ Httpdata::Httpdata(Eventloop *eloop, int connfd)
     pcstate(STATE_PARSE_URI),
     psstate(H_START),
     keepalive(false)  {
-        
+        ptochannel->setreadhandler(std::bind(&Httpdata::handleread, this));
+        ptochannel->setwritehandler(std::bind(&Httpdata::handlewrite, this));
+        ptochannel->setconnhandler(std::bind(&Httpdata::handleconn, this));
 }
-*/
+
+void Httpdata::reset() {
+    flname.clear();
+    path.clear();
+    curpos = 0;
+    pcstate = STATE_PARSE_URI;
+    psstate = H_START;
+    headers.clear();
+    keepalive = false;
+    if (wptotimer.lock()) {
+        std::shared_ptr<TimerNode> mytimer(wptotimer.lock());
+        mytimer->clearrequest();
+        wptotimer.reset(); 
+    }
+}
+
+void Httpdata::handleread() {
+    __uint32_t &events = ptochannel->getevents();
+    do {
+        bool iszero = false;
+        int read_num = readn(fd, inbuf, iszero);
+        /*   */
+        if (connstate == H_DISCONNECTING) {
+            inbuf.clear();
+            break;
+        }
+
+        if (read_num < 0) {
+            perror("1");
+            iserror = true;
+            handleerror(fd, 400, "Bad Request");
+            break;
+        }
+        else if (iszero) {
+            connstate = H_DISCONNECTING;
+            if (!read_num)
+                break;
+        }
+
+        if (pcstate == STATE_PARSE_URI) {
+            URIstate flag = this->parseURI();
+            if (flag == PARSE_URI_AGAIN)
+                break;
+            else if (flag == PARSE_URI_ERROR) {
+                perror("2");
+                /*  */
+                inbuf.clear();
+                iserror = true;
+                handleerror(fd, 400, "Bad Request");
+                break;
+            }
+            else
+                pcstate = STATE_PARSE_HEADERS;
+        }
+
+        if (pcstate = STATE_PARSE_HEADERS) {
+            Headerstate flag = this->parseheaders();
+            if (flag == PARSE_HEADER_AGAIN)
+                break;
+            else if (flag == PARSE_HEADER_ERROR) {
+                perror("3");
+                iserror = true;
+                handleerror(fd, 400, "Bad Request");
+                break;
+            }
+
+            pcstate = STATE_ANALYSIS;
+        }
+        
+        if (pcstate == STATE_ANALYSIS) {
+            Analysisstate flag = this->analysisrequest();
+            if (flag == ANALYSIS_SUCCESS) {
+                pcstate =STATE_FINISH;
+                break;
+            }
+            else {
+                iserror = true;
+                break;
+            }
+        }   
+    }while (false);
+
+    if (!iserror) {
+        if (outbuf.size() > 0) {
+            handlewrite();
+        }
+
+        if (!iserror && pcstate == STATE_FINISH) {
+            this->reset();
+            if (inbuf.size() > 0) {
+                if (connstate != H_DISCONNECTING)
+                    handleread();
+            } 
+        }
+        else if (!iserror && connstate != H_DISCONNECTED)
+            events |= EPOLLIN;
+    }
+}
+
+void Httpdata::handlewrite() {
+    if (!iserror && connstate != H_DISCONNECTED) {
+        __uint32_t &events = ptochannel->getevents();
+        if (writen(fd, outbuf) < 0) {
+            perror("writen");
+            events = 0;
+            iserror = true;
+        }
+        if (outbuf.size() > 0)
+            events |= EPOLLOUT;
+    }
+}
+
+void Httpdata::handleconn() {
+    seperatetimer();
+    __uint32_t &events = ptochannel->getevents();
+    if (!iserror && connstate == H_CONNECTED) {
+        if (events != 0) {
+            int timeout = DEFAULT_EXPIRED_TIME;
+            if (keepalive) 
+                timeout = DEFAULT_KEEP_ALIVE_TIME;
+            if ((events & EPOLLIN) && (events & EPOLLOUT)) {
+                events = __uint32_t(0);
+                events |= EPOLLOUT;
+            }
+
+            events |= EPOLLET;
+            loop->updatepoller(ptochannel, timeout);
+        }
+        else if (keepalive) {
+            events |= (EPOLLIN | EPOLLET);
+            int timeout =  DEFAULT_KEEP_ALIVE_TIME;
+            loop->updatepoller(ptochannel, timeout);
+        }       
+        else {
+            events |= (EPOLLIN | EPOLLET);
+            int timeout = (DEFAULT_KEEP_ALIVE_TIME >> 1);
+            loop->updatepoller(ptochannel, timeout);
+        }
+    }
+    else if (!iserror && connstate == H_DISCONNECTING && (events &EPOLLOUT)) {
+        events = (EPOLLOUT | EPOLLET);
+    }
+    else {
+        loop->runinloop(std::bind(&Httpdata::handleclose, shared_from_this()));
+    }
+}
+
+/* 解析请求行 */
+URIstate Httpdata::parseURI() {
+    std::string &str = inbuf;
+    std::string cpstr = str;
+    size_t pos = str.find('\r', curpos);
+    if (pos < 0) {
+        return  PARSE_URI_AGAIN;
+    }
+
+    std::string requestline = str.substr(0, pos);
+    if (str.size() > pos + 1)
+        str = str.substr(pos + 1);
+    else
+        str.clear();
+
+    int posget = requestline.find("GET");
+    int poshead = requestline.find("HEAD");
+
+    if (posget >= 0) {
+        pos = posget;
+        hmethod = METHOD_GET;
+    }
+    else if (poshead >= 0) {
+        pos = poshead;
+        hmethod = METHOD_HEAD;
+    }
+    else 
+        return PARSE_URI_ERROR;
+
+    pos = requestline.find("/", pos);
+    if (pos < 0) {
+        flname = "index.html";
+        hversion = HTTP_1_1;
+        return PARSE_URI_SUCCESS;
+    }
+    else {
+        size_t pos1 = requestline.find(' ', pos);
+        if (pos1 < 0)
+            return PARSE_URI_ERROR;
+        else {
+            if (pos1 - pos > 1) {
+                flname = requestline.substr(pos + 1, pos1 - pos - 1);
+                size_t pos2 = flname.find('?');
+                if (pos2 >= 0) {
+                    flname = flname.substr(0, pos2);
+                }
+            }
+            else
+                flname = "index.html";
+        }
+        pos = pos1;
+    }
+
+    pos = requestline.find("/", pos);
+    if (pos < 0)
+        return PARSE_URI_ERROR;
+    else {
+        if (requestline.size() - pos <= 3)
+            return PARSE_URI_ERROR;
+        else {
+            std::string vsion = requestline.substr(pos + 1, 3);
+            if (vsion == "1.0")
+                hversion = HTTP_1_0;
+            else if (vsion == "1.1")
+                hversion = HTTP_1_1;
+            else
+                return PARSE_URI_ERROR;
+        }
+    }
+    return PARSE_URI_SUCCESS;
+}
+
+/* 解析请求头部 */
+Headerstate Httpdata::parseheaders() {
+    std::string &str = inbuf;
+    int key_start = -1, key_end = -1;
+    int val_start = -1, val_end = -1;
+    int readbegin = 0;
+    bool notfinish = true;
+    size_t i = 0;
+    for ( ; i < str.size() && notfinish; ++i) {
+        switch (psstate) {
+            case H_START:
+                if (str[i] == '\n' || str[i] == '\r')
+                    break;
+                psstate = H_KEY;
+                key_start = i;
+                readbegin = i;
+                break;
+            case H_KEY:
+                if (str[i] == ':') {
+                    key_end = i;
+                    if (key_end - key_start <= 0)
+                        return PARSE_HEADER_ERROR;
+                    psstate = H_COLON;
+                }
+                else if (str[i] == '\n' || str[i] == '\r')
+                    return PARSE_HEADER_ERROR;
+                break;
+            case H_COLON: 
+                if (str[i] == ' ')
+                    psstate = H_SPACES_AFTER_COLON;
+                else
+                    return PARSE_HEADER_ERROR;
+                break;
+            case H_SPACES_AFTER_COLON:
+                psstate = H_VALUE;
+                val_start = i;
+                break;
+            case H_VALUE:
+                if (str[i] == '\r') {
+                    psstate = H_CR;
+                    val_end = i;
+                    if (val_end - val_start <= 0)
+                        return PARSE_HEADER_ERROR;
+                    else if (i - val_start > 255)
+                        return PARSE_HEADER_ERROR;
+                    break;
+                }
+            case H_CR:
+                if (str[i] == '\n') {
+                    psstate = H_LF;
+                    std::string key(str.begin() + key_start, str.begin() + key_end);
+                    std::string value(str.begin() + val_start, str.begin() + val_end);
+                    headers[key] = value;
+                    readbegin = i;
+                }
+                else 
+                    return PARSE_HEADER_ERROR;
+                break;
+            case H_LF:
+                if (str[i] == '\r')
+                    psstate = H_END_CR;
+                else {
+                    key_start = i;
+                    psstate = H_KEY;
+                }
+                break;
+            case H_END_CR:
+                if (str[i] == '\n')
+                    psstate = H_END_LF;
+                else
+                    return PARSE_HEADER_ERROR;
+                break;
+            case H_END_LF:
+                notfinish = false;
+                key_start = i;
+                readbegin = i;
+                break;
+        }
+    }
+    if (psstate == H_END_LF) {
+        str = str.substr(i);
+        return PARSE_HEADER_SUCCESS;
+    }
+    str = str.substr(readbegin);
+    return PARSE_HEADER_AGAIN;
+}
+
+/* 解析请求内容 */
+Analysisstate Httpdata::analysisrequest() {
+    if (hmethod == METHOD_GET || hmethod == METHOD_HEAD) {
+        std::string header;
+        header += "HTTP/1.1 200 OK\r\n";
+        if (headers.find("Connection") != headers.end() &&
+           (headers["connection"] == "Keep-Alive" || headers["Connection"] == "Keep-alive")) {
+               keepalive = true;
+               header += std::string("Connection: Keep-Alive\r\n") + "Keep-Alive: timeout= "
+                            + std::to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
+        }
+        int dotpos = flname.find('.');
+        std::string fltype;
+        if (dotpos < 0)
+            fltype = Mimetype::getmime("default");
+        else
+            fltype = Mimetype::getmime(flname.substr(dotpos));
+
+        if (flname == "hello") {
+            outbuf = "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\n\r\nHello World";
+            return ANALYSIS_SUCCESS;
+        }
+        if (flname == "favicon.ico") {
+            header += "Content-Type: image/png\r\n";
+            header += "Content-Length: " + std::to_string(sizeof(favicon)) + "\r\n";
+            header += "Server: Web Server\r\n";
+
+            header += "\r\n";
+            outbuf += header;
+            outbuf += std::string(favicon, favicon + sizeof(favicon));
+            return ANALYSIS_SUCCESS;
+        }
+
+        struct stat sbuf;
+        if (stat(flname.c_str(), &sbuf) < 0) {
+            header.clear();
+            handleerror(fd, 404, "Not Found!");
+            return ANALYSIS_ERROR;
+        }
+        header += "Content-Type: " + fltype + "\r\n";
+        header += "Content-Length" + std::to_string(sbuf.st_size) + "\r\n";
+        header += "Server: Web Server\r\n";
+        header += "\r\n";
+        outbuf += header;
+
+        if (hmethod == METHOD_HEAD)
+            return ANALYSIS_SUCCESS;
+
+        int srcfd = open(flname.c_str(), O_RDONLY, 0);
+        if (srcfd < 0) { 
+            outbuf.clear();
+            handleerror(fd, 404, "Not Found!");
+            return ANALYSIS_ERROR;
+        }
+        void *mmapret = mmap(NULL, sbuf.st_size, PROT_READ, MAP_PRIVATE, srcfd, 0);
+        close(srcfd);
+        if (mmapret == (void *) - 1) {
+            munmap(mmapret, sbuf.st_size);
+            outbuf.clear();
+            handleerror(fd, 404, "Not Found!");
+            return ANALYSIS_SUCCESS;
+        }
+        char *src_addr = static_cast<char *>(mmapret);
+        outbuf += std::string(src_addr, src_addr + sbuf.st_size);
+        munmap(mmapret, sbuf.st_size);
+        return ANALYSIS_SUCCESS;
+    }
+    return ANALYSIS_ERROR;
+}
+
+void Httpdata::handleerror(int fd, int errnum, std::string err_msg) {
+    err_msg = " " + err_msg;
+    char sendbuf[4096];
+    std::string bodybuf, headerbuf;
+    bodybuf += "<html><title>哎呀~出错了~</title>";
+    bodybuf += "<body bgcolor=\"ffffff\">";
+    bodybuf += std::to_string(errnum) + err_msg;
+    bodybuf += "<hr><em> Web Server</em>\n</body></html>";
+
+    headerbuf += "HTTP/1.1 " + std::to_string(errnum) + err_msg;
+    headerbuf += "Content-Type: text/html\r\n";
+    headerbuf += "Connection: Close\r\n";
+    headerbuf += "Content-Length: " + std::to_string (bodybuf.size()) + "\r\n";
+    headerbuf += "Server: Web Server\r\n";
+    headerbuf = "\r\n";
+
+    sprintf(sendbuf, "%s", headerbuf.c_str());
+    writen(fd, sendbuf, strlen(sendbuf));
+    sprintf(sendbuf, "%s", bodybuf.c_str());
+    writen(fd, sendbuf, strlen(sendbuf));
+}
+
+void Httpdata::handleclose() {
+    connstate = H_DISCONNECTED;
+    std::shared_ptr<Httpdata> guard(shared_from_this());
+    loop->removefrompoller(ptochannel);
+}
+
+void Httpdata::newevent() {
+    ptochannel->setevents(DEFAULT_EVENT);
+    loop->addtopoller(ptochannel, DEFAULT_EXPIRED_TIME);
+}
