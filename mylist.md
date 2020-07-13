@@ -23,3 +23,4 @@
 21. [muduo库的EventLoop类解析](https://blog.csdn.net/freeelinux/article/details/53510541)
 22. [xargs命令详解](https://www.cnblogs.com/wangqiguo/p/6464234.html)
 23. [makefile文件编写](https://blog.csdn.net/qq_41256212/article/details/94457489)
+24. [CMakelists.txt语法介绍与实例演练](https://blog.csdn.net/afei__/article/details/81201039)
