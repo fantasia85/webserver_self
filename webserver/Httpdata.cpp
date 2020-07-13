@@ -147,6 +147,14 @@ void Httpdata::reset() {
     }
 }
 
+void Httpdata::seperatetimer() {
+    if (wptotimer.lock()) {
+        std::shared_ptr<TimerNode> mytimer(wptotimer.lock());
+        mytimer->clearrequest();
+        mytimer.reset();
+    }
+}
+
 void Httpdata::handleread() {
     __uint32_t &events = ptochannel->getevents();
     do {
@@ -186,7 +194,7 @@ void Httpdata::handleread() {
                 pcstate = STATE_PARSE_HEADERS;
         }
 
-        if (pcstate = STATE_PARSE_HEADERS) {
+        if (pcstate == STATE_PARSE_HEADERS) {
             Headerstate flag = this->parseheaders();
             if (flag == PARSE_HEADER_AGAIN)
                 break;

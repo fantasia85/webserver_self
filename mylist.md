@@ -24,3 +24,4 @@
 22. [xargs命令详解](https://www.cnblogs.com/wangqiguo/p/6464234.html)
 23. [makefile文件编写](https://blog.csdn.net/qq_41256212/article/details/94457489)
 24. [CMakelists.txt语法介绍与实例演练](https://blog.csdn.net/afei__/article/details/81201039)
+25. [Linux中编写Shell脚本](https://blog.csdn.net/qq_36119192/article/details/82964713)

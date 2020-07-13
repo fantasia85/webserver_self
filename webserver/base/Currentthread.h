@@ -5,8 +5,8 @@
 
 namespace Currentthread {
     extern __thread int t_cachedtid;
-    /* extern __thread char t_tidstring[32]; */
-    /* extern __thread int t_tidstringlength; */
+    // extern __thread char t_tidstring[32]; 
+    // extern __thread int t_tidstringlength; 
     extern __thread const char *t_threadname;
 
     void cachetid();

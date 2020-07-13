@@ -6,6 +6,8 @@
 
 #include "base/noncopyable.h"
 #include "Eventloopthread.h"
+#include "base/Currentthread.h"
+#include "base/Thread.h"
 
 class Eventloopthreadpool : noncopyable {
     public:

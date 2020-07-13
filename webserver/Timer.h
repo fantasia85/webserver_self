@@ -4,6 +4,7 @@
 #include <memory>
 #include <deque>
 #include <queue>
+#include "base/Currentthread.h"
 
 class Httpdata;
 

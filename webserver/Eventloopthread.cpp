@@ -1,7 +1,6 @@
 /* EventLoopThread.(事件循环线程，由事件循环线程池管理).
  * 用于管理具体的线程(Thread)和事件循环(Eventloop) */
 
-#pragma once
 #include "Eventloopthread.h"
 #include <assert.h>
 

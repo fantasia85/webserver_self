@@ -168,7 +168,8 @@ int setsocketnonblocking(int fd)
     int val;
     if ((val = fcntl(fd, F_GETFL, 0)) < 0)
         return -1;
-    if (fcntl(fd, F_SETFL, val | O_NONBLOCK) < 0)
+    val |= O_NONBLOCK;
+    if (fcntl(fd, F_SETFL, val) < 0)
         return -1;
     return 0;
 }

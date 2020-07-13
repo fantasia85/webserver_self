@@ -18,9 +18,7 @@ TimerNode::~TimerNode() {
 }
 
 TimerNode::TimerNode(TimerNode &tn) 
-    : deleted_(tn.deleted_), ptohttpdata(tn.ptohttpdata), expiredtime_(0) {
-
-}
+    : expiredtime_(0), ptohttpdata(tn.ptohttpdata)  {}
 
 void TimerNode::updata(int timeout) {
     struct timeval now;

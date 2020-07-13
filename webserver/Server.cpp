@@ -55,9 +55,9 @@ void Server::handnewconn() {
 
         setsocketnodelay(acceptfd);
 
-        std::shared_ptr<Httpdata> reqinfo(new Httpdata(loop, acceptfd));
+        std::shared_ptr<Httpdata> reqinfo(new Httpdata(eloop, acceptfd));
         reqinfo->getchannel()->setholder(reqinfo);
-        loop->queueinloop(std::bind(&Httpdata::newevent, reqinfo));
+        eloop->queueinloop(std::bind(&Httpdata::newevent, reqinfo));
     }
     acceptor->setevents(EPOLLIN | EPOLLET);
 }

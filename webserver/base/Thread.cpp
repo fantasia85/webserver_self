@@ -10,10 +10,10 @@
 #include <assert.h>
 
 /* __thread变量每个线程有一份独立实体，各个线程的值互不干扰 */
-namespace CurrentThread {
+namespace Currentthread {
     __thread int t_cachedtid = 0;
-    __thread char t_tidstring[32];
-    __thread int t_tidstringlength = 6;
+    // __thread char t_tidstring[32];
+    // __thread int t_tidstringlength = 6;
     __thread const char * t_threadname = "default";
 }
 
@@ -61,7 +61,7 @@ Thread::Thread(const Threadfunc &tfunc, const std::string &str)
 }
 
 Thread::~Thread() {
-    if (started && !join)
+    if (started && !joined)
         pthread_detach(pthreadid);
 }
 

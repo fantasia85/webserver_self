@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     /*  */
 
     int opt;
-    const char *str = "t:l:p";
+    const char *str = "t:p";
     while ((opt = getopt(argc, argv, str)) != -1) {
         switch(opt) {
             case 't':

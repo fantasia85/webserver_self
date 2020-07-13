@@ -9,6 +9,7 @@
 #include <functional>
 #include "Channel.h"
 #include "base/Currentthread.h"
+#include "base/Thread.h"
 #include <sys/socket.h>
 #include <vector>
 

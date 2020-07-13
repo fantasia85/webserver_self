@@ -4,7 +4,7 @@
 #include "Channel.h"
 
 Channel::Channel(Eventloop *evntloop) 
-    : loop(evntloop), events(0), lastevents(0), fd(0) {}
+    : loop(evntloop), fd(0), events(0), lastevents(0)  {}
 
 Channel::Channel(Eventloop *evntloop, int fdtor) 
     : loop(evntloop), fd(fdtor), events(0), lastevents(0) {}
@@ -25,8 +25,8 @@ void Channel::handleread() {
 }
 
 void Channel::handlewrite() {
-    if (handlewrite)
-        handlewrite();
+    if (writehandler)
+        writehandler();
 }
 
 void Channel::handleconn() {
