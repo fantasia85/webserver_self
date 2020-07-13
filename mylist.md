@@ -21,3 +21,5 @@
 19. [CountDownLatch的理解和使用](https://www.cnblogs.com/Lee_xy_z/p/10470181.html)
 20. [muduo架构解析](https://blog.csdn.net/Swartz2015/article/details/56675082?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase)
 21. [muduo库的EventLoop类解析](https://blog.csdn.net/freeelinux/article/details/53510541)
+22. [xargs命令详解](https://www.cnblogs.com/wangqiguo/p/6464234.html)
+23. [makefile文件编写](https://blog.csdn.net/qq_41256212/article/details/94457489)
