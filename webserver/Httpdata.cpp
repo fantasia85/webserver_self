@@ -451,7 +451,7 @@ Analysisstate Httpdata::analysisrequest() {
         std::string header;
         header += "HTTP/1.1 200 OK\r\n";
         if (headers.find("Connection") != headers.end() &&
-           (headers["connection"] == "Keep-Alive" || headers["Connection"] == "Keep-alive")) {
+           (headers["Connection"] == "Keep-Alive" || headers["Connection"] == "Keep-alive")) {
                keepalive = true;
                header += std::string("Connection: Keep-Alive\r\n") + "Keep-Alive: timeout= "
                             + std::to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
