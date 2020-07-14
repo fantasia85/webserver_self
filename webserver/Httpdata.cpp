@@ -522,14 +522,14 @@ void Httpdata::handleerror(int fd, int errnum, std::string err_msg) {
     bodybuf += "<html><title>哎呀~出错了~</title>";
     bodybuf += "<body bgcolor=\"ffffff\">";
     bodybuf += std::to_string(errnum) + err_msg;
-    bodybuf += "<hr><em> Web Server</em>\n</body></html>";
+    bodybuf += "<hr><em> Web Server</em>\n</body></html>\r\n";
 
     headerbuf += "HTTP/1.1 " + std::to_string(errnum) + err_msg;
     headerbuf += "Content-Type: text/html\r\n";
     headerbuf += "Connection: Close\r\n";
     headerbuf += "Content-Length: " + std::to_string (bodybuf.size()) + "\r\n";
     headerbuf += "Server: Web Server\r\n";
-    headerbuf = "\r\n";
+    headerbuf += "\r\n";
 
     sprintf(sendbuf, "%s", headerbuf.c_str());
     writen(fd, sendbuf, strlen(sendbuf));
