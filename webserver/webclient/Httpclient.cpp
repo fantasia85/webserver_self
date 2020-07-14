@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
         perror("error1");
     sleep(1);
 
-    p = "GET HTTP1.1";
+    p = "GET  HTTP/1.1";
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
         setconnsocketnonblocking(sockfd);
@@ -60,8 +60,7 @@ int main(int argc, char *argv[]) {
         perror("error2");
     sleep(1);
 
-    p = "GET / HTTP/1.1\r\nHost: 127.0.0.1:80\r\nContent-Type: application/x-www-form-unlencoded\r\n"
-        "Connection: Keep-Alive\r\n\r\n";
+    p = "GET / HTTP/1.1\r\nHost: 127.0.0.1:80\r\nContent-Type: application/x-www-form-unlencoded\r\nConnection: Keep-Alive\r\n\r\n";
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
         setconnsocketnonblocking(sockfd);
