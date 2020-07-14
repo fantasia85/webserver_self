@@ -32,3 +32,4 @@
 *.app
 webserver/Httpclient
 webserver/webserver
+webserver/index.html

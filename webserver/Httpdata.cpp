@@ -211,7 +211,7 @@ void Httpdata::handleread() {
         if (pcstate == STATE_ANALYSIS) {
             Analysisstate flag = this->analysisrequest();
             if (flag == ANALYSIS_SUCCESS) {
-                pcstate =STATE_FINISH;
+                pcstate = STATE_FINISH;
                 break;
             }
             else {
@@ -378,18 +378,27 @@ Headerstate Httpdata::parseheaders() {
             case H_KEY:
                 if (str[i] == ':') {
                     key_end = i;
-                    if (key_end - key_start <= 0)
+                    if (key_end - key_start <= 0) /* {
+                        perror("key error");  // debug 
+                        return PARSE_HEADER_ERROR;
+                    } */
                         return PARSE_HEADER_ERROR;
                     psstate = H_COLON;
                 }
-                else if (str[i] == '\n' || str[i] == '\r')
+                else if (str[i] == '\n' || str[i] == '\r') /* {
+                    perror ("key errror"); // debug
                     return PARSE_HEADER_ERROR;
+                } */
+                     return PARSE_HEADER_ERROR;  
                 break;
             case H_COLON: 
                 if (str[i] == ' ')
                     psstate = H_SPACES_AFTER_COLON;
-                else
+                else /* {
+                    perror("colon error"); //debug
                     return PARSE_HEADER_ERROR;
+                } */
+                    return PARSE_HEADER_ERROR; 
                 break;
             case H_SPACES_AFTER_COLON:
                 psstate = H_VALUE;
@@ -399,12 +408,18 @@ Headerstate Httpdata::parseheaders() {
                 if (str[i] == '\r') {
                     psstate = H_CR;
                     val_end = i;
-                    if (val_end - val_start <= 0)
+                    if (val_end - val_start <= 0) /* {
+                        perror ("val error"); // debug
                         return PARSE_HEADER_ERROR;
-                    else if (i - val_start > 255)
-                        return PARSE_HEADER_ERROR;
-                    break;
+                    } */
+                    return PARSE_HEADER_ERROR;
                 }
+                else if (i - val_start > 255) /* {
+                    perror ("val error"); // debug 
+                    return PARSE_HEADER_ERROR;
+                } */
+                    return PARSE_HEADER_ERROR; 
+                break;
             case H_CR:
                 if (str[i] == '\n') {
                     psstate = H_LF;
@@ -413,7 +428,10 @@ Headerstate Httpdata::parseheaders() {
                     headers[key] = value;
                     readbegin = i;
                 }
-                else 
+                else /* {
+                    perror("H_CR error"); // debug
+                    return PARSE_HEADER_ERROR;
+                } */
                     return PARSE_HEADER_ERROR;
                 break;
             case H_LF:
@@ -427,7 +445,10 @@ Headerstate Httpdata::parseheaders() {
             case H_END_CR:
                 if (str[i] == '\n')
                     psstate = H_END_LF;
-                else
+                else /*{
+                    perror("H_END_CR ERROR"); //debug
+                    return PARSE_HEADER_ERROR;
+                } */ 
                     return PARSE_HEADER_ERROR;
                 break;
             case H_END_LF:
@@ -485,10 +506,13 @@ Analysisstate Httpdata::analysisrequest() {
             return ANALYSIS_ERROR;
         }
         header += "Content-Type: " + fltype + "\r\n";
-        header += "Content-Length" + std::to_string(sbuf.st_size) + "\r\n";
+        header += "Content-Length: " + std::to_string(sbuf.st_size) + "\r\n";
         header += "Server: Web Server\r\n";
         header += "\r\n";
         outbuf += header;
+
+        /* 已知问题：在正确找到文件并输出之后，若第一次缓存区的长度比第二次长，则第二次正常输出之后，仍然会输出
+         * 第一次的缓存区中仍然存在的字符，需要找到问题并修改 */
 
         if (hmethod == METHOD_HEAD)
             return ANALYSIS_SUCCESS;
@@ -519,12 +543,12 @@ void Httpdata::handleerror(int fd, int errnum, std::string err_msg) {
     err_msg = " " + err_msg;
     char sendbuf[4096];
     std::string bodybuf, headerbuf;
-    bodybuf += "<html><title>哎呀~出错了~</title>";
-    bodybuf += "<body bgcolor=\"ffffff\">";
-    bodybuf += std::to_string(errnum) + err_msg;
+    bodybuf += "<html><title>哎呀~出错了~</title>\r\n";
+    bodybuf += "<body bgcolor=\"ffffff\">\r\n";
+    bodybuf += std::to_string(errnum) + err_msg + "\r\n";
     bodybuf += "<hr><em> Web Server</em>\n</body></html>\r\n";
 
-    headerbuf += "HTTP/1.1 " + std::to_string(errnum) + err_msg;
+    headerbuf += "HTTP/1.1 " + std::to_string(errnum) + err_msg + "\r\n";
     headerbuf += "Content-Type: text/html\r\n";
     headerbuf += "Connection: Close\r\n";
     headerbuf += "Content-Length: " + std::to_string (bodybuf.size()) + "\r\n";
@@ -535,6 +559,7 @@ void Httpdata::handleerror(int fd, int errnum, std::string err_msg) {
     writen(fd, sendbuf, strlen(sendbuf));
     sprintf(sendbuf, "%s", bodybuf.c_str());
     writen(fd, sendbuf, strlen(sendbuf));
+    //bzero(sendbuf, sizeof(sendbuf));
 }
 
 void Httpdata::handleclose() {

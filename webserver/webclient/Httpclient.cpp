@@ -43,7 +43,8 @@ int main(int argc, char *argv[]) {
         perror("error1");
     sleep(1);
 
-    p = "GET  HTTP/1.1";
+    p = "GET HTTP/1.1\r\n";
+    /* p = "GET  HTTP/1.1"; */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
         setconnsocketnonblocking(sockfd);
