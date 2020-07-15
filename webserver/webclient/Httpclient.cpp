@@ -78,6 +78,23 @@ int main(int argc, char *argv[]) {
         perror("error3");
     sleep(1);
 
+    p = "HEAD / HTTP/1.1\r\nHost: 127.0.0.1:80\r\nContent-Type: application/x-www-form-unlencoded\r\nConnection: Keep-Alive\r\n\r\n";
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
+        setconnsocketnonblocking(sockfd);
+        std::cout << "4: " << std::endl;
+        ssize_t n = write(sockfd, p, strlen(p));
+        std::cout << "strlen(p) = " << strlen(p) << std::endl;
+        sleep(1);
+        n = read(sockfd, buf, 4096);
+        std::cout << "n = " << n << std::endl;
+        std::cout << buf;
+        close(sockfd); 
+    }
+    else
+        perror("error4");
+    sleep(1);
+
     return 0;
 }
 
