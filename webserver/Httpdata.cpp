@@ -23,6 +23,7 @@ const int DEFAULT_EXPIRED_TIME = 2000;
 const int DEFAULT_KEEP_ALIVE_TIME = 5 * 60 * 1000;
 
 /* favicon.ico */
+/*
 char favicon[555] = {
     '\x89', 'P',    'N',    'G',    '\xD',  '\xA',  '\x1A', '\xA',  '\x0',
     '\x0',  '\x0',  '\xD',  'I',    'H',    'D',    'R',    '\x0',  '\x0',
@@ -87,6 +88,7 @@ char favicon[555] = {
     'v',    '\x98', 'I',    '\x0',  '\x0',  '\x0',  '\x0',  'I',    'E',
     'N',    'D',    '\xAE', 'B',    '\x60', '\x82',
 };
+*/
 
 void Mimetype::init() {
     mime[".html"] = "text/html";
@@ -468,6 +470,7 @@ Headerstate Httpdata::parseheaders() {
 
 /* 解析请求内容 */
 Analysisstate Httpdata::analysisrequest() {
+    /* outbuf.clear(); */
     if (hmethod == METHOD_GET || hmethod == METHOD_HEAD) {
         std::string header;
         header += "HTTP/1.1 200 OK\r\n";
@@ -488,6 +491,7 @@ Analysisstate Httpdata::analysisrequest() {
             outbuf = "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\n\r\nHello World";
             return ANALYSIS_SUCCESS;
         }
+        /*
         if (flname == "favicon.ico") {
             header += "Content-Type: image/png\r\n";
             header += "Content-Length: " + std::to_string(sizeof(favicon)) + "\r\n";
@@ -498,6 +502,7 @@ Analysisstate Httpdata::analysisrequest() {
             outbuf += std::string(favicon, favicon + sizeof(favicon));
             return ANALYSIS_SUCCESS;
         }
+        */
 
         struct stat sbuf;
         if (stat(flname.c_str(), &sbuf) < 0) {
@@ -510,9 +515,6 @@ Analysisstate Httpdata::analysisrequest() {
         header += "Server: Web Server\r\n";
         header += "\r\n";
         outbuf += header;
-
-        /* 已知问题：在正确找到文件并输出之后，若第一次缓存区的长度比第二次长，则第二次正常输出之后，仍然会输出
-         * 第一次的缓存区中仍然存在的字符，需要找到问题并修改 */
 
         if (hmethod == METHOD_HEAD)
             return ANALYSIS_SUCCESS;
@@ -543,7 +545,7 @@ void Httpdata::handleerror(int fd, int errnum, std::string err_msg) {
     err_msg = " " + err_msg;
     char sendbuf[4096];
     std::string bodybuf, headerbuf;
-    bodybuf += "<html><title>哎呀~出错了~</title>\r\n";
+    bodybuf += "<html><title>Wrong~</title>\r\n";
     bodybuf += "<body bgcolor=\"ffffff\">\r\n";
     bodybuf += std::to_string(errnum) + err_msg + "\r\n";
     bodybuf += "<hr><em> Web Server</em>\n</body></html>\r\n";

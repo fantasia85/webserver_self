@@ -116,10 +116,12 @@ ssize_t writen (int fd, void *buf, size_t nbytes)
 
 ssize_t writen(int fd, std::string &sbuf)
 {
-    size_t nbytes = sbuf.size();
+    /* 理论上nbytes应该等于sbuf.size()，然而在计算size()的时候，不会算上string结尾的'\0'（也有一说是在调用c_str()时会在末尾补充'\0'），
+     * 因此实际上未+1时，'\0'没有被写进去，可能导致下一次调用writen时，仍然输出第一次缓存区中的内容 */
+    size_t nbytes = sbuf.size() + 1;
     ssize_t nwritten = 0;
     size_t nleft = nbytes;
-    /* 使用了string中的c_str()函数，生成一个const char *指针，指向以空字符结束的数组 */ 
+    /* 使用了string中的c_str()函数，生成一个const char *指针，指向以空字符结束的数组  */
     const char *ptr = sbuf.c_str();
     while (nleft > 0) {
         if ((nwritten = write(fd, ptr, nleft)) <= 0) {
@@ -144,6 +146,7 @@ ssize_t writen(int fd, std::string &sbuf)
     return nbytes - nleft;
 }
 
+/* in <string.h> */
 /*
 void *bzero(void *ptr, size_t n)
 {
