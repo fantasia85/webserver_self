@@ -27,3 +27,7 @@
 25. [Linux中编写Shell脚本](https://blog.csdn.net/qq_36119192/article/details/82964713)
 26. [linux启动http服务](https://www.cnblogs.com/webttt/p/10290429.html)
 27. [TCP的拥塞控制（详解）](https://blog.csdn.net/qq_41431406/article/details/97926927)
+28. [C++RAII机制](https://blog.csdn.net/quinta_2018_01_09/article/details/93638251)
+29. [C++11常用新特性](https://blog.csdn.net/jiange_zh/article/details/79356417)
+30. [C++11 互斥量std::mutex/锁std::lock\_guard](https://blog.csdn.net/WizardtoH/article/details/81452066?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.nonecase)
+31. [设计模式之观察者模式](https://www.cnblogs.com/yssjun/p/11107038.html)
