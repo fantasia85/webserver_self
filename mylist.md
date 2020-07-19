@@ -31,3 +31,4 @@
 29. [C++11常用新特性](https://blog.csdn.net/jiange_zh/article/details/79356417)
 30. [C++11 互斥量std::mutex/锁std::lock\_guard](https://blog.csdn.net/WizardtoH/article/details/81452066?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.nonecase)
 31. [设计模式之观察者模式](https://www.cnblogs.com/yssjun/p/11107038.html)
+32. [多线程编程中条件变量和虚假唤醒](https://www.cnblogs.com/kex1n/p/7030707.html)
