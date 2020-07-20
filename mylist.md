@@ -33,3 +33,4 @@
 31. [设计模式之观察者模式](https://www.cnblogs.com/yssjun/p/11107038.html)
 32. [多线程编程中条件变量和虚假唤醒](https://www.cnblogs.com/kex1n/p/7030707.html)
 33. [cookie和session的详解和区别](https://www.cnblogs.com/l199616j/p/11195667.html)
+34. [C++的POD类型详解](https://blog.csdn.net/bichenggui/article/details/4719363?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
