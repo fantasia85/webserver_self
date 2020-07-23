@@ -34,3 +34,8 @@
 32. [多线程编程中条件变量和虚假唤醒](https://www.cnblogs.com/kex1n/p/7030707.html)
 33. [cookie和session的详解和区别](https://www.cnblogs.com/l199616j/p/11195667.html)
 34. [C++的POD类型详解](https://blog.csdn.net/bichenggui/article/details/4719363?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
+35. [什么是死锁，产生死锁的原因及必要条件](https://blog.csdn.net/hd12370/article/details/82814348)
+36. [死锁的四个必要条件和解决办法](https://blog.csdn.net/guaiguaihenguai/article/details/80303835?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
+37. [银行家算法](https://blog.csdn.net/qq_36260974/article/details/84404369)
+38. [硬链接和符号链接详解](https://blog.csdn.net/qq_41816540/article/details/81556768)
+39. [Linux inode详解](https://www.cnblogs.com/llife/p/11470668.html)
