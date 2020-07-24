@@ -39,3 +39,4 @@
 37. [银行家算法](https://blog.csdn.net/qq_36260974/article/details/84404369)
 38. [硬链接和符号链接详解](https://blog.csdn.net/qq_41816540/article/details/81556768)
 39. [Linux inode详解](https://www.cnblogs.com/llife/p/11470668.html)
+40. [动态规划](https://www.cnblogs.com/hithongming/p/9229871.html)
