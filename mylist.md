@@ -41,3 +41,5 @@
 39. [Linux inode详解](https://www.cnblogs.com/llife/p/11470668.html)
 40. [动态规划](https://www.cnblogs.com/hithongming/p/9229871.html)
 41. [堆与栈的区别](https://blog.csdn.net/K346K346/article/details/80849966/)
+42. [Linux kill命令详解](https://www.cnblogs.com/Confusedren/p/11150072.html)
+43. [进程 进程组 会话 控制终端之间的关系](https://blog.csdn.net/yh1548503342/article/details/41891047?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param)
