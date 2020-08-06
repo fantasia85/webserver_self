@@ -60,3 +60,4 @@
 58. [UML中常见关系详解](https://www.cnblogs.com/itplay/p/10671715.html)
 59. [设计模式之单例模式](https://www.jianshu.com/p/3bfd916f2bb2)
 60. [C++单例模式总结与剖析](https://www.cnblogs.com/sunchaothu/p/10389842.html)
+61. [C++ 类中成员变量是引用](https://blog.csdn.net/lazyq7/article/details/48186291?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param)
