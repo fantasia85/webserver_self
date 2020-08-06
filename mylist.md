@@ -58,3 +58,5 @@
 56. [Phxrpc协程库实现](https://www.jianshu.com/p/4d95eb7af24b)
 57. [UML类图](https://www.jianshu.com/p/57620b762160)
 58. [UML中常见关系详解](https://www.cnblogs.com/itplay/p/10671715.html)
+59. [设计模式之单例模式](https://www.jianshu.com/p/3bfd916f2bb2)
+60. [C++单例模式总结与剖析](https://www.cnblogs.com/sunchaothu/p/10389842.html)
