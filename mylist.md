@@ -56,3 +56,5 @@
 54. [基于ucontext.h的轻量级协程库](https://www.jianshu.com/p/4f7d3aa83088)
 55. [线程上下文切换详解](https://blog.csdn.net/dh554112075/article/details/90696768)
 56. [Phxrpc协程库实现](https://www.jianshu.com/p/4d95eb7af24b)
+57. [UML类图](https://www.jianshu.com/p/57620b762160)
+58. [UML中常见关系详解](https://www.cnblogs.com/itplay/p/10671715.html)
